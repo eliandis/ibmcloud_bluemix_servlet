@@ -1,0 +1,6 @@
+---
+applications:
+- name: sensor_feed
+  memory: 256M
+  host: sensorfeed
+  domain: mybluemix.net
