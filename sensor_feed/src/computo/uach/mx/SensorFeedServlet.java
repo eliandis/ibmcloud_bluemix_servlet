@@ -30,6 +30,7 @@ public class SensorFeedServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	DatabaseConnection db_connection;
 	private String [] sensor_names = {"None","Temp","Light","Vibration","Weight","Proximity", "Force"};
+	private String [] sensor_sources = {"None","PHIDGET","MOTE","OTHER"};
 	private String token = "fu0AZbxH4Ig:APA91bEIP0kAvwAB-Hch8a0PctVIM8OMwa48RsENORBXfDEhOWHFkpdX6YEhcX2scsr7P4jxgr_Ighw7ql6HIdqyc2bkjmp0vx73_aD84Sx89V1s4eMgFEMPautCcQOc1gfNOTWLOj8n";
 	private static final String HttpPostURL = "https://fcm.googleapis.com/fcm/send";
 	private static final String AutorizationKey = "key=AIzaSyB9s85hSIaA-CcUHpHtRw3LmSGYAIVjwSA";
@@ -46,13 +47,15 @@ public class SensorFeedServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		db_connection = new DatabaseConnection();
 		String param1 = "sensor";
-        String sensorType = request.getParameter(param1);
+        String sensorType = request.getParameter(param1);       
         String param2 = "value";
-        String sensorValue = request.getParameter(param2);                
+        String sensorValue = request.getParameter(param2);
+        String param3 = "source";
+        String sensorSource = request.getParameter(param3);
         try {
         	response.setContentType("application/json");
         	if (!"".equals(sensorType) && sensorType!=null){        		
-        		Sensor newSensor = setDetails(Integer.parseInt(sensorType), sensorValue );
+        		Sensor newSensor = setDetails(Integer.parseInt(sensorType),Integer.parseInt(sensorSource), sensorValue );
         		SendNotification(newSensor);
         		response.getWriter().write(getSensors(newSensor.get_id()));
         	}else{
@@ -72,13 +75,13 @@ public class SensorFeedServlet extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	private Sensor setDetails(int sensorId, String sensorValue) {
+	private Sensor setDetails(int sensorId, int sensorSource, String sensorValue) {
     	Sensor sensor = null;
-    	if (!"".equals(sensorValue) && sensorValue!=null){  
-    		sensor = new Sensor(sensor_names[sensorId], sensorId, sensorValue);    	
+    	if (!"".equals(sensorValue) && sensorValue!=null){
+    		sensor = new Sensor(sensor_names[sensorId], sensor_sources[sensorSource], sensorId, sensorValue);    	
     		return db_connection.persist(sensor);
     	}else{
-    		sensor = new Sensor(sensor_names[sensorId], sensorId);    		
+    		sensor = new Sensor(sensor_names[sensorId], sensor_sources[sensorSource], sensorId);    		
     	}
     	return db_connection.persist(sensor);
     }
@@ -92,9 +95,10 @@ public class SensorFeedServlet extends HttpServlet {
 			for (Sensor doc : db_connection.getAll()) {
 				String name = doc.getName();
 				String value = doc.getValue();
+				String source = doc.getSource();
 				String time = doc.getTime().toString();
 				if (name != null){
-					names.add(name+", "+value+", "+time);
+					names.add(source+", "+name+", "+value+", "+time);
 				}
 			}
 		}else{
@@ -102,8 +106,9 @@ public class SensorFeedServlet extends HttpServlet {
 			String name = doc.getName();
 			String value = doc.getValue();
 			String time = doc.getTime().toString();
+			String source = doc.getSource();
 			if (name != null){
-				names.add(name+", "+value+", "+time);
+				names.add(source+", "+name+", "+value+", "+time);
 			}
 		}
 		if (names.isEmpty()){
@@ -120,7 +125,7 @@ public class SensorFeedServlet extends HttpServlet {
         NotificationRequestModel notificationRequestModel = new NotificationRequestModel();
         NotificationData notificationData = new NotificationData();
         notificationData.setDetail("Value: "+sensor.getValue());
-        notificationData.setTitle("Sensor "+sensor.getName());
+        notificationData.setTitle(sensor.getSource()+" SENSOR "+sensor.getName());
         notificationRequestModel.setData(notificationData);
         notificationRequestModel.setTo(token);
         Gson gson = new Gson();

@@ -9,18 +9,21 @@ public class Sensor {
 	private String _id;
 	private String _rev;
 	private String name = null;
+	private String source = null;
 	private int sensor_id = 0;
 	private String value = null;
 	private Timestamp time = null;
-	public Sensor(String name, int sensor_id) {
+	public Sensor(String name, String source, int sensor_id) {
 		this.name = name;
+		this.source = source;
 		this.sensor_id = sensor_id;
 		setTime(new Timestamp(System.currentTimeMillis()));
 		Random r = new Random();
 		this.value = r.doubles(0.000000000000000, 1.000000000000000).findFirst().getAsDouble()+"";
 	}
-	public Sensor(String name, int sensor_id, String value) {
+	public Sensor(String name, String source, int sensor_id, String value) {
 		this.name = name;
+		this.source = source;
 		this.setSensorId(sensor_id);
 		this.setValue(value);
 		setTime(new Timestamp(System.currentTimeMillis()));		
@@ -66,7 +69,7 @@ public class Sensor {
 	}
 	
 	/**
-	 * Gets the visitorName of the document.
+	 * Gets the name of the document.
 	 * 
 	 * @return The name of the document.
 	 */
@@ -78,10 +81,28 @@ public class Sensor {
 	 * Sets the name
 	 * 
 	 * @param name
-	 *            The visitorName to set.
+	 *            The name to set.
 	 */
-	public void setName(String visitorName) {
-		this.name = visitorName;
+	public void setName(String name) {
+		this.name = name;
+	}
+	/**
+	 * Gets the source of the document.
+	 * 
+	 * @return The source of the document.
+	 */
+	public String getSource() {
+		return source;
+	}
+
+	/**
+	 * Sets the source
+	 * 
+	 * @param source
+	 *            The source to set.
+	 */
+	public void setSource(String source) {
+		this.source = source;
 	}
 	public int getSensorId() {
 		return sensor_id;
